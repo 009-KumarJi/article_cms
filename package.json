@@ -1,0 +1,32 @@
+{
+  "name": "envint_article_cms",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "cross-env NODE_ENV=PRODUCTION node server.js",
+    "dev": "cross-env NODE_ENV=DEVELOPMENT nodemon server.js"
+  },
+  "keywords": [],
+  "author": {
+    "email": "krishnakumar091@yahoo.com",
+    "name": "Krishna Kumar",
+    "url": "https://github.com/009-KumarJi/article_cms.git"
+  },
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-validator": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.5.1",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "nodemon": "^3.1.4"
+  }
+}
