@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 
 const fileSchema = new mongoose.Schema(
     {
-        name: {
-            type: String,
-            required: [true, 'File name is required'],
-        },
         public_id: {
             type: String,
             required: [true, 'Public ID is required'],

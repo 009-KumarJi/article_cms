@@ -26,8 +26,15 @@ const userSchema = new mongoose.Schema(
             select: false,
         },
         avatar: {
-            type: String,
-            trim: true,
+            id: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'File',
+            },
+            url: {
+                type: String,
+                required: true,
+                trim: true,
+            },
         },
         role: {
             type: String,

@@ -5,12 +5,19 @@ import { compare } from 'bcrypt';
 import { TryCatch } from '../middlewares/error.middleware.js';
 import {cookieOptions, sendToken} from "../utils/features.js";
 import {avatarUrl, sessionId} from "../utils/constants.js";
+import {uploadFile} from "./file.controller.js";
 
 const register = TryCatch(async (req, res, next) => {
     let { name, username, password, email, avatar, gender } = req.body;
-
-    if (!avatar) avatar = avatarUrl(gender);
-
+    if (req.file) {
+        const file = req.file;
+        const newFile = await uploadFile({ ...req, file }, res, next, true);
+        avatar = {
+            id: newFile._id,
+            url: newFile.url,
+        };
+    }
+    if (!avatar) avatar = { url: avatarUrl(gender) };
     const user = await User.create({
         name,
         username,

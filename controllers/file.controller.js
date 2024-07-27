@@ -5,9 +5,8 @@ import { ErrorHandler } from '../utils/utility.js';
 import { TryCatch } from '../middlewares/error.middleware.js';
 
 // Upload file
-const uploadFile = TryCatch(async (req, res, next) => {
+const uploadFile = TryCatch(async (req, res, next, internal = false) => {
     const file = req.file;
-    const filename = req.body.filename || file.originalname;
 
     if (!file) return next(new ErrorHandler('No file uploaded', 400));
 
@@ -19,13 +18,16 @@ const uploadFile = TryCatch(async (req, res, next) => {
 
     // Save file details to the database
     const newFile = await File.create({
-        name: filename,
         public_id,
         url,
         type: file.mimetype,
         size: file.size,
         uploadedBy: req.userId,
     });
+
+    if (internal) {
+        return newFile;
+    }
 
     res.status(201).json({
         success: true,
