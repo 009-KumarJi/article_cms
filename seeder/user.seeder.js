@@ -1,1 +1,0 @@
-const createUsers = async () => {};

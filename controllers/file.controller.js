@@ -6,7 +6,7 @@ import {deleteFilesFromCloudinary, uploadFilesToCloudinary} from "../utils/featu
 import {envMode} from "../utils/constants.js";
 
 
-const uploadFile = TryCatch(async (req, res, next, internal = false) => {
+const uploadFile = TryCatch(async (req, res, next) => {
     let file = req.files || req.file;
 
     if (!file) return next(new ErrorHandler('No file uploaded', 400));
@@ -22,10 +22,6 @@ const uploadFile = TryCatch(async (req, res, next, internal = false) => {
         size: result.size,
         uploadedBy: req.userId,
     })));
-
-    if (internal) {
-        return newFiles;
-    }
 
     res.status(201).json({
         success: true,

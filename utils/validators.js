@@ -29,6 +29,10 @@ const articleValidator = () => [
     body('heading', 'Heading is required').notEmpty(),
     body('content', 'Content is required').notEmpty(),
     body('status', 'Status must be either draft, published, or archived').isIn(['draft', 'published', 'archived']),
+    body('tags', 'Tags must be an array').isArray(),
+    body('thumbnail', 'Thumbnail is required').notEmpty(),
+    body('files', 'Files must be an array').isArray(),
+
 ];
 
 export {

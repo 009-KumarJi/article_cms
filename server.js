@@ -1,5 +1,3 @@
-// server.js
-
 import express from "express";
 import cors from "cors";
 import { connectDB } from "./utils/features.js";
@@ -63,7 +61,7 @@ app.use((req, res, next) => {
 
 // Route handlers
 app.use("/api/auth", authRoutes); // Authentication Endpoints --OK
-app.use("/api/users", userRoutes); // User Endpoints
+app.use("/api/users", userRoutes); // User Endpoints --OK
 app.use("/api/articles", articleRoutes); // Article Endpoints
 app.use("/api/files", fileRoutes); // File Endpoints --OK
 

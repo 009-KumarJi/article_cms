@@ -55,10 +55,6 @@ const updateArticle = TryCatch(async (req, res, next) => {
     let article = await Article.findById(id);
     if (!article) return next(new ErrorHandler('Article not found', 404));
 
-    // Ensure the user is authorized to update
-    if (req.userId.toString() !== article.createdBy.toString()) {
-        return next(new ErrorHandler('Unauthorized to update this article', 403));
-    }
 
     article = await Article.findByIdAndUpdate(
         id,

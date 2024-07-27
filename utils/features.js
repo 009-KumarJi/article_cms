@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import {jwtSecret, sessionId} from "./constants.js";
 import {sout} from "./utility.js";
-import { v2 as cloudinary } from 'cloudinary';
+import {v2 as cloudinary} from 'cloudinary';
 import {getBase64} from "../helper/cloudinary.js";
 import {v4 as uuid} from "uuid";
 
@@ -46,37 +46,51 @@ const sendToken = (res, user, code, message) => {
         });
 };
 
-const uploadFilesToCloudinary = async (files = []) => {
+const uploadFilesToCloudinary = async (files = [], avatar = false) => {
     sout("Uploading files to cloudinary...", files);
-    const uploadPromises = files.map((file) => { // mapping over the files array
-        return new Promise((resolve, reject) => { // creating a new promise for each file
-            cloudinary.uploader.upload( // uploading the file to cloudinary
-                getBase64(file), // passing the base64 data of the file
-                { // options for the upload
+
+    const uploadPromises = files.map((file) => {
+        return new Promise((resolve, reject) => {
+            cloudinary.uploader.upload(
+                getBase64(file),
+                {
                     resource_type: "auto",
                     public_id: uuid(),
                 },
-                (error, result) => { // callback function for the upload
-                    if (error) return reject(error); // if there is an error, reject the promise
-                    resolve(result); // if the upload is successful, resolve the promise
-                });
+                (error, result) => {
+                    if (error) {
+                        sout("Error uploading file to Cloudinary:", error);
+                        return reject(error);
+                    }
+                    sout("File uploaded to Cloudinary:", result);
+                    resolve(result);
+                }
+            );
         });
     });
 
     try {
-        const results = await Promise.all(uploadPromises); // waiting for all the promises to resolve
-        sout("Files uploaded successfully!"); // logging a success message
-        sout(results); // logging the results
-        return results.map((result) => { // formatting the results
-            return {
-                public_id: result.public_id,
-                url: result.secure_url,
-                type: result.format,
-                size: result.bytes,
-            };
-        }); // returning the formatted results
+        const results = await Promise.all(uploadPromises);
+        sout("Files uploaded successfully!");
+        sout("Upload results:", results);
+
+        return results.map((result) => {
+            const formattedResult = !avatar
+                ? {
+                    public_id: result.public_id,
+                    url: result.secure_url,
+                    type: result.format,
+                    size: result.bytes,
+                }
+                : {
+                    public_id: result.public_id,
+                    url: result.secure_url,
+                };
+            sout("Formatted result:", formattedResult);
+            return formattedResult;
+        });
     } catch (error) {
-        sout(error); // logging the error
+        sout("Error during file upload process:", error);
         throw new Error("Oopsy-poopsy... Something got fused in upload process...");
     }
 };

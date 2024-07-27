@@ -17,8 +17,8 @@ const articleSchema = new mongoose.Schema(
         },
         files: [
             {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'File',
+                type: String,
+                trim: true,
             },
         ],
         createdBy: {

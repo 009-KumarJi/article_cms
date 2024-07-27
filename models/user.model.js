@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Provide a Username!'],
             trim: true,
+            unique: true
         },
         email: {
             type: String,
@@ -31,14 +32,13 @@ const userSchema = new mongoose.Schema(
             select: false,
         },
         avatar: {
-            id: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'File',
+            public_id: {
+                type: String,
             },
             url: {
                 type: String,
                 required: true,
-                trim: true,
+                trim: true
             },
         },
         role: {
