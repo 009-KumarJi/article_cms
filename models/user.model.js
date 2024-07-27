@@ -30,9 +30,10 @@ const userSchema = new mongoose.Schema(
             trim: true,
         },
         role: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Role',
-            required: true,
+            type: String,
+            enum: ['Admin', 'Moderator', 'User'],
+            default: 'User',
+            trim: true
         },
     },
     {
