@@ -3,10 +3,11 @@ import express from 'express';
 import { register, login, logout, getCurrentUser } from '../controllers/auth.controller.js';
 import { isAuthenticated } from '../middlewares/auth.middleware.js';
 import {loginValidator, registerValidator, validateHandler} from "../utils/validators.js";
+import {singleMulter} from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
-router.post('/register', registerValidator(), validateHandler, register); // Register a new user
+router.post('/register', singleMulter, registerValidator(), validateHandler, register); // Register a new user
 router.post('/login', loginValidator(), validateHandler, login); // Login a user
 
 router.use(isAuthenticated);

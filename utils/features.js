@@ -3,6 +3,10 @@ import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import {jwtSecret, sessionId} from "./constants.js";
 import {sout} from "./utility.js";
+import { v2 as cloudinary } from 'cloudinary';
+import {getBase64} from "../helper/cloudinary.js";
+import {v4 as uuid} from "uuid";
+
 
 const cookieOptions = {
     maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
@@ -31,13 +35,19 @@ const sendToken = (res, user, code, message) => {
         .cookie(sessionId, token, cookieOptions)
         .json({
             success: true,
-            user,
+            user: {
+                name: user.firstName + " " + user.lastName,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                avatar: user.avatar.url,
+            },
             message
         });
 };
 
 const uploadFilesToCloudinary = async (files = []) => {
-    sout("Uploading files to cloudinary...");
+    sout("Uploading files to cloudinary...", files);
     const uploadPromises = files.map((file) => { // mapping over the files array
         return new Promise((resolve, reject) => { // creating a new promise for each file
             cloudinary.uploader.upload( // uploading the file to cloudinary
@@ -56,16 +66,21 @@ const uploadFilesToCloudinary = async (files = []) => {
     try {
         const results = await Promise.all(uploadPromises); // waiting for all the promises to resolve
         sout("Files uploaded successfully!"); // logging a success message
+        sout(results); // logging the results
         return results.map((result) => { // formatting the results
             return {
                 public_id: result.public_id,
                 url: result.secure_url,
+                type: result.format,
+                size: result.bytes,
             };
         }); // returning the formatted results
     } catch (error) {
+        sout(error); // logging the error
         throw new Error("Oopsy-poopsy... Something got fused in upload process...");
     }
 };
+
 const deleteFilesFromCloudinary = async (publicIds) => {
     sout("Deleting files from cloudinary...");
 
@@ -87,4 +102,10 @@ const deleteFilesFromCloudinary = async (publicIds) => {
 };
 
 
-export {connectDB, sendToken, cookieOptions};
+export {
+    connectDB,
+    sendToken,
+    uploadFilesToCloudinary,
+    deleteFilesFromCloudinary,
+    cookieOptions
+};

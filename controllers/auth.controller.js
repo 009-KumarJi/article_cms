@@ -8,7 +8,7 @@ import {avatarUrl, sessionId} from "../utils/constants.js";
 import {uploadFile} from "./file.controller.js";
 
 const register = TryCatch(async (req, res, next) => {
-    let { name, username, password, email, avatar, gender } = req.body;
+    let { firstName, lastName, username, password, email, avatar, gender } = req.body;
     if (req.file) {
         const file = req.file;
         const newFile = await uploadFile({ ...req, file }, res, next, true);
@@ -19,7 +19,8 @@ const register = TryCatch(async (req, res, next) => {
     }
     if (!avatar) avatar = { url: avatarUrl(gender) };
     const user = await User.create({
-        name,
+        firstName,
+        lastName,
         username,
         password,
         email,

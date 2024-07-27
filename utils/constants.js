@@ -23,6 +23,10 @@ const avatarUrl = (gender = "male") => {
     return `https://api.dicebear.com/9.x/adventurer/svg?seed=${randomName}`;
 };
 
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+const cloudApiKey = process.env.CLOUDINARY_API_KEY;
+const cloudApiSecret = process.env.CLOUDINARY_API_SECRET;
+
 
 const printAll = () => {
     sout({
@@ -36,4 +40,17 @@ const printAll = () => {
     })
 }
 
-export {envMode, dbName, dbUrl, clientUrl, jwtSecret, PORT, sessionId, printAll, avatarUrl};
+export {
+    envMode,
+    dbName,
+    dbUrl,
+    clientUrl,
+    jwtSecret,
+    PORT,
+    sessionId,
+    cloudName,
+    cloudApiKey,
+    cloudApiSecret,
+    printAll,
+    avatarUrl
+};

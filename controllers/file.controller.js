@@ -1,38 +1,36 @@
 // controllers/file.controller.js
 import { File } from '../models/file.model.js';
-import { uploadFilesToCloudinary, deleteFilesFromCloudinary } from '../helpers/cloudinary.js';
-import { ErrorHandler } from '../utils/utility.js';
+import {ErrorHandler, sout} from '../utils/utility.js';
 import { TryCatch } from '../middlewares/error.middleware.js';
+import {deleteFilesFromCloudinary, uploadFilesToCloudinary} from "../utils/features.js";
+import {envMode} from "../utils/constants.js";
 
-// Upload file
+
 const uploadFile = TryCatch(async (req, res, next, internal = false) => {
-    const file = req.file;
+    let file = req.files || req.file;
 
     if (!file) return next(new ErrorHandler('No file uploaded', 400));
-
+    if (!Array.isArray(file)) file = [file];
     // Upload file to Cloudinary
-    const results = await uploadFilesToCloudinary([file]);
+    const results = await uploadFilesToCloudinary(file);
     if (!results) return next(new ErrorHandler('File upload failed', 500));
 
-    const { public_id, url } = results[0]; // Get the first result (assuming single file upload)
-
-    // Save file details to the database
-    const newFile = await File.create({
-        public_id,
-        url,
-        type: file.mimetype,
-        size: file.size,
+    const newFiles = await File.insertMany(results.map(result => ({
+        public_id: result.public_id,
+        url: result.url,
+        type: result.type,
+        size: result.size,
         uploadedBy: req.userId,
-    });
+    })));
 
     if (internal) {
-        return newFile;
+        return newFiles;
     }
 
     res.status(201).json({
         success: true,
         message: 'File uploaded successfully!',
-        file: newFile,
+        ...(envMode === "DEVELOPMENT" && { file: newFiles }),
     });
 });
 

@@ -11,10 +11,11 @@ const validateHandler = (req, res, next) => {
 };
 
 const registerValidator = () => [
-    body('name', 'Name is required').notEmpty(),
+    body('firstName', 'Name is required').notEmpty(),
+    body('lastName', 'Name is required').notEmpty(),
     body('username', 'Username is required').notEmpty(),
     body('email', 'Enter a valid email').isEmail(),
-    body('password', 'Password must be at least 6 characters long').isLength({ min: 6 }),
+    body('password', 'Password must be at least 8 characters long').isLength({ min: 8 }),
 ];
 
 // Validation rules for user login

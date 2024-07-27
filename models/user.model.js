@@ -3,9 +3,14 @@ import { hash } from 'bcrypt';
 
 const userSchema = new mongoose.Schema(
     {
-        name: {
+        firstName: {
             type: String,
-            required: [true, 'Provide Your name'],
+            required: [true, 'Provide Your first name'],
+            trim: true,
+        },
+        lastName: {
+            type: String,
+            required: [true, 'Provide Your last name'],
             trim: true,
         },
         username: {
