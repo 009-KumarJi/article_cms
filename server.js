@@ -57,16 +57,15 @@ app.use((req, res, next) => {
     sout("----------------------------------------------------------------------------------")
     sout(`Route being hit: ${req.method} ${req.path}`);
     sout("Req Body", req.body);
-    sout("req file", req.file);
     sout("----------------------------------------------------------------------------------")
     next();
 });
 
 // Route handlers
-app.use("/api/auth", authRoutes); // Authentication Endpoints -- done
+app.use("/api/auth", authRoutes); // Authentication Endpoints --OK
 app.use("/api/users", userRoutes); // User Endpoints
 app.use("/api/articles", articleRoutes); // Article Endpoints
-app.use("/api/files", fileRoutes); // File Endpoints -- progress
+app.use("/api/files", fileRoutes); // File Endpoints --OK
 
 // Error handling middleware
 app.use(errorMiddleware);

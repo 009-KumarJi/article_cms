@@ -8,11 +8,11 @@ import {multipleMulter} from "../middlewares/multer.middleware.js";
 const router = express.Router();
 
 router.use(isAuthenticated);
-// router.use(isAdmin);
+router.use(isAdmin);
 
-router.post('/', multipleMulter, uploadFile); // Authenticated: upload file
-router.get('/', getFiles); // Authenticated: get all files
-router.get('/:id', getFileById); // Authenticated: get file by ID
-router.delete('/:id', deleteFile); // Admin: delete file
+router.post('/', multipleMulter, uploadFile); // Authenticated: upload file --OK
+router.get('/', getFiles); // Authenticated: get all files --OK
+router.get('/:id', getFileById); // Authenticated: get file by ID --OK
+router.delete('/:id', deleteFile); // Admin: delete file --OK
 
 export default router;
