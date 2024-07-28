@@ -60,4 +60,7 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
+// Index for full-text search
+userSchema.index({ firstName: 'text', lastName: 'text', username: 'text' });
+
 export const User = mongoose.models.User || mongoose.model('User', userSchema);

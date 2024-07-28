@@ -1,11 +1,11 @@
 // controllers/article.controller.js
-import { Article } from '../models/article.model.js';
-import { ErrorHandler } from '../utils/utility.js';
-import { TryCatch } from '../middlewares/error.middleware.js';
+import {Article} from '../models/article.model.js';
+import {ErrorHandler, sout} from '../utils/utility.js';
+import {TryCatch} from '../middlewares/error.middleware.js';
 
 // Create a new article
-const createArticle = TryCatch(async (req, res, next) => {
-    const { heading, content, thumbnail, files, tags, status } = req.body;
+const createArticle = TryCatch(async (req, res) => {
+    const {heading, content, thumbnail, files, tags, status} = req.body;
 
     const article = await Article.create({
         heading,
@@ -36,7 +36,7 @@ const getArticles = TryCatch(async (req, res) => {
 
 // Get an article by ID
 const getArticleById = TryCatch(async (req, res, next) => {
-    const { id } = req.params;
+    const {id} = req.params;
 
     const article = await Article.findById(id);
     if (!article) return next(new ErrorHandler('Article not found', 404));
@@ -49,8 +49,8 @@ const getArticleById = TryCatch(async (req, res, next) => {
 
 // Update an article
 const updateArticle = TryCatch(async (req, res, next) => {
-    const { id } = req.params;
-    const { heading, content, thumbnail, files, tags, status } = req.body;
+    const {id} = req.params;
+    const {heading, content, thumbnail, files, tags, status} = req.body;
 
     let article = await Article.findById(id);
     if (!article) return next(new ErrorHandler('Article not found', 404));
@@ -58,8 +58,8 @@ const updateArticle = TryCatch(async (req, res, next) => {
 
     article = await Article.findByIdAndUpdate(
         id,
-        { heading, content, thumbnail, files, tags, status, updatedBy: req.userId },
-        { new: true }
+        {heading, content, thumbnail, files, tags, status, updatedBy: req.userId},
+        {new: true}
     );
 
     res.status(200).json({
@@ -71,7 +71,7 @@ const updateArticle = TryCatch(async (req, res, next) => {
 
 // Delete an article
 const deleteArticle = TryCatch(async (req, res, next) => {
-    const { id } = req.params;
+    const {id} = req.params;
 
     const article = await Article.findById(id);
     if (!article) return next(new ErrorHandler('Article not found', 404));
@@ -89,7 +89,21 @@ const deleteArticle = TryCatch(async (req, res, next) => {
     });
 });
 
+const searchArticles = TryCatch(async (req, res) => {
+    const { q = "" } = req.query;
+    sout("Searching articles with query:", q);
+
+    const searchString = q.replace(/\+/g, " ");  // Replacing '+' with space
+
+    const articles = await Article.find({
+        $text: { $search: searchString }
+    });
+
+    res.status(200).json(articles);
+});
+
 export {
+    searchArticles,
     createArticle,
     getArticleById,
     getArticles,

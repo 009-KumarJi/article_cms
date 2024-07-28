@@ -55,6 +55,8 @@ app.use((req, res, next) => {
     sout("----------------------------------------------------------------------------------")
     sout(`Route being hit: ${req.method} ${req.path}`);
     sout("Req Body", req.body);
+    sout("Req Params", req.params);
+    sout("Req Query", req.query);
     sout("----------------------------------------------------------------------------------")
     next();
 });
@@ -62,7 +64,7 @@ app.use((req, res, next) => {
 // Route handlers
 app.use("/api/auth", authRoutes); // Authentication Endpoints --OK
 app.use("/api/users", userRoutes); // User Endpoints --OK
-app.use("/api/articles", articleRoutes); // Article Endpoints
+app.use("/api/articles", articleRoutes); // Article Endpoints --OK
 app.use("/api/files", fileRoutes); // File Endpoints --OK
 
 // Error handling middleware
