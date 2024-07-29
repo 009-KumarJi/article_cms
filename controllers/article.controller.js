@@ -24,7 +24,7 @@ const createArticle = TryCatch(async (req, res) => {
     });
 });
 
-// Get all articles (pagination and search can be added as needed)
+// Get all articles
 const getArticles = TryCatch(async (req, res) => {
     const articles = await Article.find();
 

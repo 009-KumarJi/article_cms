@@ -1,4 +1,4 @@
-// utility.js
+// Path: utils/utility.js
 import {envMode} from "./constants.js";
 
 class ErrorHandler extends Error {
@@ -13,4 +13,3 @@ const sout = (...text) => envMode === "DEVELOPMENT" && console.log(...text);
 
 export {ErrorHandler, sout};
 
-// Path: server/utils/utility.js
