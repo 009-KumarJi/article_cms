@@ -41,6 +41,10 @@ const articleSchema = new mongoose.Schema(
             enum: ['draft', 'published', 'archived'],
             default: 'draft',
         },
+        category: {
+            type: String,
+            trim: true
+        }
     },
     {
         timestamps: true,
@@ -49,5 +53,6 @@ const articleSchema = new mongoose.Schema(
 
 // Index for full-text search
 articleSchema.index({ heading: 'text', content: 'text', tags: 'text' });
+
 
 export const Article = mongoose.models.Article || mongoose.model('Article', articleSchema);

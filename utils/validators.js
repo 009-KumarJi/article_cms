@@ -15,7 +15,7 @@ const registerValidator = () => [
     body('lastName', 'Name is required').notEmpty(),
     body('username', 'Username is required').notEmpty(),
     body('email', 'Enter a valid email').isEmail(),
-    body('password', 'Password must be at least 8 characters long').isLength({ min: 8 }),
+    body('password', 'Password must be at least 8 characters long').isLength({ min: 8 }).isAlphanumeric(),
 ];
 
 // Validation rules for user login

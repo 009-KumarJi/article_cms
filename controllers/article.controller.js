@@ -2,10 +2,11 @@
 import {Article} from '../models/article.model.js';
 import {ErrorHandler, sout} from '../utils/utility.js';
 import {TryCatch} from '../middlewares/error.middleware.js';
+import {User} from "../models/user.model.js";
 
 // Create a new article
 const createArticle = TryCatch(async (req, res) => {
-    const {heading, content, thumbnail, files, tags, status} = req.body;
+    const {heading, content, thumbnail, files, tags, status, category} = req.body;
 
     const article = await Article.create({
         heading,
@@ -14,6 +15,7 @@ const createArticle = TryCatch(async (req, res) => {
         files,
         tags,
         status,
+        category,
         createdBy: req.userId,
     });
 
@@ -27,10 +29,34 @@ const createArticle = TryCatch(async (req, res) => {
 // Get all articles
 const getArticles = TryCatch(async (req, res) => {
     const articles = await Article.find();
+    let users = await User.find()
+
+    let usersF = {}
+    users.map(user => {
+        usersF[user["_id"].toString()] = user.username;
+    })
+
+    let result = {};
+    articles.map(article => {
+        let f = result[article.category];
+        if (!f){
+            result[article.category] = [{
+                heading: article.heading,
+                username: usersF[article.createdBy],
+                category: article.category
+            }];
+        } else {
+            result[article.category].push({
+                heading: article.heading,
+                username: usersF[article.createdBy],
+                category: article.category
+            });
+        }
+    })
 
     res.status(200).json({
         success: true,
-        articles,
+        articles: result,
     });
 });
 
@@ -50,7 +76,7 @@ const getArticleById = TryCatch(async (req, res, next) => {
 // Update an article
 const updateArticle = TryCatch(async (req, res, next) => {
     const {id} = req.params;
-    const {heading, content, thumbnail, files, tags, status} = req.body;
+    const {heading, content, thumbnail, files, tags, status, category} = req.body;
 
     let article = await Article.findById(id);
     if (!article) return next(new ErrorHandler('Article not found', 404));
@@ -58,7 +84,7 @@ const updateArticle = TryCatch(async (req, res, next) => {
 
     article = await Article.findByIdAndUpdate(
         id,
-        {heading, content, thumbnail, files, tags, status, updatedBy: req.userId},
+        {heading, content, thumbnail, files, tags, status, category, updatedBy: req.userId},
         {new: true}
     );
 
@@ -89,16 +115,29 @@ const deleteArticle = TryCatch(async (req, res, next) => {
     });
 });
 
+const searchArticleByCategory = TryCatch(async (req, res, next) => {
+    const {category = ""} = req.query;
+    if (category.length === 0) {
+        return getArticles(req, res, next);
+    }
+
+    const articles = await Article.find({
+        category: category,
+    });
+
+    res.status(200).json(articles);
+})
+
 const searchArticles = TryCatch(async (req, res) => {
-    const { q = "" } = req.query;
+    const {q = ""} = req.query;
     sout("Searching articles with query:", q);
 
     const searchString = q.replace(/\+/g, " ");  // Replacing '+' with space
 
     const articles = await Article.find({
-        $text: { $search: searchString }
+        $text: {$search: searchString},
     });
-
+// category
     res.status(200).json(articles);
 });
 
@@ -108,5 +147,6 @@ export {
     getArticleById,
     getArticles,
     updateArticle,
-    deleteArticle
+    deleteArticle,
+    searchArticleByCategory
 };

@@ -8,7 +8,7 @@ import {
     getArticleById,
     updateArticle,
     deleteArticle,
-    searchArticles
+    searchArticles, searchArticleByCategory
 } from '../controllers/article.controller.js';
 import {articleValidator, validateHandler} from "../utils/validators.js";
 
@@ -18,6 +18,9 @@ router.use(isAuthenticated);
 router.get('/', getArticles);              // All: read articles --OK
 router.post('/', isAdmin, articleValidator(), validateHandler, createArticle);  // Admin: create article --OK
 router.get('/search', searchArticles);     // All: search articles
+
+router.get('/searchByCategory', searchArticleByCategory);
+
 router.put('/:id', isModerator, updateArticle); // Admin/Moderator: update article --OK
 router.delete('/:id', isAdmin, deleteArticle);  // Admin: delete article
 router.get('/:id', getArticleById);        // All: read specific article --OK
