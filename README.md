@@ -1,4 +1,3 @@
-
 # Article CMS Backend
 
 This repository encompasses the backend architecture for an Article Content Management System (CMS) featuring user roles, authentication, and CRUD operations.
@@ -13,10 +12,22 @@ The system defines three roles with different permissions:
 ## Features
 
 ### User Authentication
-- Secure password storage with hashing (bcrypt).
-- JWT-based authentication.
-- User password encryption.
-- Cookies/Sessions management.
+- **Secure password storage with hashing (bcrypt):**
+    - Bcrypt adds a salt to the password before hashing, which helps protect against rainbow table attacks.
+
+- **JWT-based authentication:**
+    - Upon successful login, a JWT is generated and sent to the client with encryption. This token is then used to authenticate subsequent requests.
+
+- **Cookies/Sessions management:**
+    - Authentication token (encrypted) is stored in cookies to maintain user sessions.
+    - Cookies are configured with security options such as HttpOnly, Secure, and SameSite to prevent XSS and CSRF attacks.
+  
+- **Access and Refresh Tokens:**
+    - Upon successful login, both access and refresh tokens are generated.
+    - The access token is short-lived and used for authenticating API requests.
+    - The refresh token is long-lived and used to obtain a new access token when the current one expires.
+    - Refresh tokens are stored securely in the Redis and associated with the user session.
+    - The server provides an endpoint to refresh the access token using the refresh token, ensuring continuous authentication without requiring the user to log in again.
 
 ### Role Management
 - Middleware for role-based access control (RBAC).
@@ -69,6 +80,7 @@ The system defines three roles with different permissions:
 - `POST /api/auth/login` - Login a user and return a JWT.
 - `GET /api/auth/logout` - Logout a user and clear the session.
 - `GET /api/auth/me` - Get the current user.
+- `POST /api/auth/refresh-token` - Refresh the access token.
 
 #### Articles:
 - `POST /api/articles` - Create a new article (Admin only).
