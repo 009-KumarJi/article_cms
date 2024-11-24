@@ -7,6 +7,7 @@ import {v2 as cloudinary} from 'cloudinary';
 import {getBase64} from "../helper/cloudinary.js";
 import {v4 as uuid} from "uuid";
 import {generateAuthTokens} from "./jwt.js";
+import CustomError from "./CustomError.js";
 
 
 
@@ -19,7 +20,7 @@ const connectDB = (uri, dbName) => {
             console.log(`Successfully connected to the database at host: ${data.connection.host}`);
         })
         .catch((err) => {
-            throw new Error(err);
+            throw new CustomError("Failed to connect to the database", "DatabaseConnectionError", 500);
         });
 }
 
@@ -68,7 +69,7 @@ const uploadFilesToCloudinary = async (files = [], avatar = false) => {
         });
     } catch (error) {
         sout("Error during file upload process:", error);
-        throw new Error("Oopsy-poopsy... Something got fused in upload process...");
+        throw new CustomError("Oopsy-poopsy... Something got fused in upload process...");
     }
 };
 
@@ -97,5 +98,4 @@ export {
     connectDB,
     uploadFilesToCloudinary,
     deleteFilesFromCloudinary,
-    cookieOptions
 };

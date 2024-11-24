@@ -8,7 +8,7 @@ const generateAccessToken = (user) => {
 		return encrypt(jwt.sign(user, process.env.JWT_ACCESS_SECRET, {expiresIn: process.env.JWT_ACCESS_EXPIRY}));
 	} catch (error) {
 		console.error(`Error generating access token: ${error.message}`);
-		throw new CustomError("TokenGenerationError", "Failed to generate access token");
+		throw new CustomError("Failed to generate access token", "TokenGenerationError");
 	}
 };
 
@@ -20,7 +20,7 @@ const generateRefreshToken = (userId) => {
 		return encrypt(refreshToken);
 	} catch (error) {
 		console.error(`Error generating refresh token: ${error.message}`);
-		throw new CustomError("TokenGenerationError", "Failed to generate refresh token");
+		throw new CustomError("Failed to generate refresh token", "TokenGenerationError");
 	}
 };
 
