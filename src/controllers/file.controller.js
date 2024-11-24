@@ -26,7 +26,7 @@ const uploadFile = TryCatch(async (req, res, next) => {
     res.status(201).json({
         success: true,
         message: 'File uploaded successfully!',
-        ...(envMode === "DEVELOPMENT" && { file: newFiles }),
+        ...(envMode === "development" && { file: newFiles }),
     });
 });
 

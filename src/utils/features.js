@@ -6,14 +6,9 @@ import {sout} from "./utility.js";
 import {v2 as cloudinary} from 'cloudinary';
 import {getBase64} from "../helper/cloudinary.js";
 import {v4 as uuid} from "uuid";
+import {generateAuthTokens} from "./jwt.js";
 
 
-const cookieOptions = {
-    maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
-    httpOnly: true,
-    sameSite: "none",
-    secure: true,
-};
 
 const connectDB = (uri, dbName) => {
     console.log("Attempting to connect to database...");
@@ -27,24 +22,6 @@ const connectDB = (uri, dbName) => {
             throw new Error(err);
         });
 }
-
-const sendToken = (res, user, code, message) => {
-    const token = jwt.sign({id: user._id}, jwtSecret);
-    return res
-        .status(code)
-        .cookie(sessionId, token, cookieOptions)
-        .json({
-            success: true,
-            user: {
-                name: user.firstName + " " + user.lastName,
-                username: user.username,
-                email: user.email,
-                role: user.role,
-                avatar: user.avatar.url,
-            },
-            message
-        });
-};
 
 const uploadFilesToCloudinary = async (files = [], avatar = false) => {
     sout("Uploading files to cloudinary...", files);
@@ -118,7 +95,6 @@ const deleteFilesFromCloudinary = async (publicIds) => {
 
 export {
     connectDB,
-    sendToken,
     uploadFilesToCloudinary,
     deleteFilesFromCloudinary,
     cookieOptions

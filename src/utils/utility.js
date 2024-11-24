@@ -9,7 +9,7 @@ class ErrorHandler extends Error {
   }
 }
 
-const sout = (...text) => envMode === "DEVELOPMENT" && console.log(...text);
+const sout = (...text) => envMode === "development" && console.log(...text);
 
 export {ErrorHandler, sout};
 
