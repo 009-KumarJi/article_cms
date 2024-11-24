@@ -26,13 +26,33 @@ const register = TryCatch(async (req, res, next) => {
 		email,
 		avatar
 	});
+
 	const cookiePayload = {
 		userId: user._id,
 		username: user.username,
 		email: user.email,
 		role: user.role,
 	}
-	sendToken(res, cookiePayload, 201, "User created successfully!");
+
+	const {accessToken, refreshToken} = generateAuthTokens(cookiePayload);
+	const session = await storeSession(user._id, refreshToken, accessToken);
+	if (!session) return next(new ErrorHandler("Failed to store session", 500));
+
+	return res
+		.status(200)
+		.cookie("accessToken", accessToken, cookieOptions)
+		.cookie("refreshToken", refreshToken, cookieOptions)
+		.json({
+			success: true,
+			user: encrypt({
+				name: user.firstName + " " + user.lastName,
+				username: user.username,
+				email: user.email,
+				role: user.role,
+				avatar: user.avatar.url,
+			}),
+			message: "User registered successfully",
+		});
 });
 
 const login = TryCatch(async (req, res, next) => {
@@ -53,8 +73,8 @@ const login = TryCatch(async (req, res, next) => {
 
 	const {accessToken, refreshToken} = generateAuthTokens(cookiePayload);
 
-	const previousSession = await getUserSessions(user._id);
-	const session = await storeSession(user._id, refreshToken, previousSession);
+	const previousSessions = await getUserSessions(user._id);
+	const session = await storeSession(user._id, refreshToken, accessToken, previousSessions);
 	if (!session) return next(new ErrorHandler("Failed to store session", 500));
 
 	return res
@@ -75,12 +95,10 @@ const login = TryCatch(async (req, res, next) => {
 });
 
 const logout = TryCatch(async (req, res, next) => {
-	let {accessToken, refreshToken} = req?.cookies;
-	sout(decrypt(accessToken));
-	sout(decrypt(refreshToken))
+	let {accessToken} = req?.cookies;
 	if (!accessToken || !refreshToken) return next(new ErrorHandler('Unauthorized request', 403));
 
-	await deleteSession(req.user?.userId, decrypt(refreshToken));
+	await deleteSession(req.user?.userId, decrypt(accessToken));
 
 	return res
 		.status(200)
@@ -102,12 +120,14 @@ const getCurrentUser = TryCatch(async (req, res, next) => {
 });
 
 const refreshToken = TryCatch(async (req, res, next) => {
-	let {refreshToken, accessToken} = req?.cookies;
+	let {accessToken} = req?.cookies;
 	if (!refreshToken) return next(new ErrorHandler('Refresh token not provided', 400));
 
 	// decrypt both tokens
-	refreshToken = decrypt(refreshToken);
 	accessToken = decrypt(accessToken);
+	const activeSessions = await getUserSessions(req.user.userId);
+	const refreshToken = activeSessions.find(session => session.accessToken === accessToken)?.refreshToken;
+	if (!refreshToken) return next(new ErrorHandler('Forbidden Request', 403));
 
 	// check if refresh token is valid
 	const verifiedToken = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);

@@ -48,14 +48,14 @@ const getUserSessions = async (userId) => {
 };
 
 
-const storeSession = async (userId, refreshToken, sessions) => {
+const storeSession = async (userId, refreshToken, accessToken, sessions) => {
 	try {
 		console.log(`Storing session for user ${userId} - ${refreshToken}`);
-		if (!refreshToken || !userId) {
+		if (!refreshToken || !userId || !accessToken) {
 			console.error(`Invalid session data for user ${userId}`);
 			return false;
 		}
-		const newSession = {refreshToken, lastLogin: Date.now()};
+		const newSession = {refreshToken, accessToken, lastLogin: Date.now()};
 
 		const updatedSessions = sessions ? [...sessions, newSession] : [newSession];
 		await setAsync(`sessions:${userId}`, JSON.stringify(updatedSessions), 'EX', 60 * 60 * 12);
@@ -66,12 +66,12 @@ const storeSession = async (userId, refreshToken, sessions) => {
 	}
 };
 
-const deleteSession = async (userId, refreshToken = "") => {
+const deleteSession = async (userId, accessToken = "") => {
 	try {
 		const sessions = await getUserSessions(userId);
 		if (!sessions) return;
 
-		const updatedSessions = sessions.filter(session => session.refreshToken !== refreshToken);
+		const updatedSessions = sessions.filter(session => session.accessToken !== accessToken);
 		if (updatedSessions.length === 0) {
 			await delAsync(`sessions:${userId}`);
 			return;
