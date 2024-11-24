@@ -16,7 +16,7 @@ const createArticle = TryCatch(async (req, res) => {
         tags,
         status,
         category,
-        createdBy: req.userId,
+        createdBy: req.user.userId,
     });
 
     res.status(201).json({
@@ -84,7 +84,7 @@ const updateArticle = TryCatch(async (req, res, next) => {
 
     article = await Article.findByIdAndUpdate(
         id,
-        {heading, content, thumbnail, files, tags, status, category, updatedBy: req.userId},
+        {heading, content, thumbnail, files, tags, status, category, updatedBy: req.user.userId},
         {new: true}
     );
 
@@ -103,7 +103,7 @@ const deleteArticle = TryCatch(async (req, res, next) => {
     if (!article) return next(new ErrorHandler('Article not found', 404));
 
     // Ensure the user is authorized to delete
-    if (req.userId.toString() !== article.createdBy.toString()) {
+    if (req.user.userId.toString() !== article.createdBy.toString()) {
         return next(new ErrorHandler('Unauthorized to delete this article', 403));
     }
 

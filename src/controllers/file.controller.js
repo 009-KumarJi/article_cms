@@ -20,7 +20,7 @@ const uploadFile = TryCatch(async (req, res, next) => {
         url: result.url,
         type: result.type,
         size: result.size,
-        uploadedBy: req.userId,
+        uploadedBy: req.user.userId,
     })));
 
     res.status(201).json({

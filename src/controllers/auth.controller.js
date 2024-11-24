@@ -59,10 +59,10 @@ const login = TryCatch(async (req, res, next) => {
 	const {username, password} = req.body;
 
 	const user = await User.findOne({username}).select("+password");
-	if (!user) return next(new ErrorHandler("Invalid credentials", 401));
+	if (!user) return next(new ErrorHandler("Invalid credentials", 403));
 
 	const isPasswordCorrect = await compare(password, user.password);
-	if (!isPasswordCorrect) return next(new ErrorHandler("Invalid credentials", 401));
+	if (!isPasswordCorrect) return next(new ErrorHandler("Invalid credentials", 403));
 
 	const cookiePayload = {
 		userId: user._id,
@@ -108,7 +108,7 @@ const logout = TryCatch(async (req, res, next) => {
 });
 
 const getCurrentUser = TryCatch(async (req, res, next) => {
-	const user = await User.findById(req.userId).select("-password");
+	const user = await User.findById(req.user.userId).select("-password");
 
 	if (!user) return next(new ErrorHandler("User not found", 404));
 
