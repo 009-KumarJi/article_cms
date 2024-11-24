@@ -18,7 +18,7 @@ const getAllUsers = TryCatch(async (req, res) => {
 const getUserById = TryCatch(async (req, res, next) => {
     const {id} = req.params;
 
-    const user = await User.findById(id).select('-password'); // Exclude password from response
+    const user = await User.findById(id).select('-password');
     if (!user) return next(new ErrorHandler('User not found', 404));
 
     res.status(200).json({
@@ -35,7 +35,7 @@ const updateUser = TryCatch(async (req, res, next) => {
     const user = await User.findByIdAndUpdate(id, updates, {
         new: true,
         runValidators: true,
-    }).select('-password'); // Exclude password from response
+    }).select('-password');
 
     if (!user) return next(new ErrorHandler('User not found', 404));
 

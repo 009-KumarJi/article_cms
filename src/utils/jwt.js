@@ -5,7 +5,7 @@ import {delAsync, getAsync, setAsync} from "./redis.js";
 
 const generateAccessToken = (user) => {
 	try {
-		return encrypt(jwt.sign(user, process.env.JWT_ACCESS_SECRET, {expiresIn: process.env.JWT_ACCESS_EXPIRY}));
+		return jwt.sign(user, process.env.JWT_ACCESS_SECRET, {expiresIn: process.env.JWT_ACCESS_EXPIRY});
 	} catch (error) {
 		console.error(`Error generating access token: ${error.message}`);
 		throw new CustomError("Failed to generate access token", "TokenGenerationError");
@@ -15,9 +15,8 @@ const generateAccessToken = (user) => {
 
 const generateRefreshToken = (userId) => {
 	try {
-		const payload = { userId };
-		const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: process.env.JWT_REFRESH_EXPIRY });
-		return encrypt(refreshToken);
+		const payload = {userId};
+		return jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {expiresIn: process.env.JWT_REFRESH_EXPIRY});
 	} catch (error) {
 		console.error(`Error generating refresh token: ${error.message}`);
 		throw new CustomError("Failed to generate refresh token", "TokenGenerationError");
@@ -29,7 +28,7 @@ const generateAuthTokens = (user) => {
 	try {
 		const accessToken = generateAccessToken(user);
 		const refreshToken = generateRefreshToken(user.userId);
-		return { accessToken, refreshToken };
+		return {accessToken, refreshToken};
 	} catch (error) {
 		console.error(`Error generating auth tokens: ${error.message}`);
 		throw error;
@@ -47,8 +46,7 @@ const getUserSessions = async (userId) => {
 	}
 };
 
-
-const storeSession = async (userId, refreshToken, accessToken, sessions) => {
+const storeSession = async (userId, refreshToken, accessToken, sessions, replaceAccessToken = false) => {
 	try {
 		console.log(`Storing session for user ${userId} - ${refreshToken}`);
 		if (!refreshToken || !userId || !accessToken) {
@@ -57,7 +55,23 @@ const storeSession = async (userId, refreshToken, accessToken, sessions) => {
 		}
 		const newSession = {refreshToken, accessToken, lastLogin: Date.now()};
 
-		const updatedSessions = sessions ? [...sessions, newSession] : [newSession];
+		let updatedSessions;
+		if (replaceAccessToken) {
+			updatedSessions = sessions
+				? sessions
+					.map(session =>
+						session.refreshToken === refreshToken
+							? {
+								...session,
+								accessToken
+							}
+							: session
+					)
+				: [newSession];
+		} else {
+			updatedSessions = sessions ? [...sessions, newSession] : [newSession];
+		}
+
 		await setAsync(`sessions:${userId}`, JSON.stringify(updatedSessions), 'EX', 60 * 60 * 12);
 		return true;
 	} catch (error) {

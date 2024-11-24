@@ -10,7 +10,6 @@ const envMode = process.env.NODE_ENV || "PRODUCTION";
 const dbName = process.env.DB_NAME;
 const dbUrl = process.env.MONGO_URI;
 const clientUrl = process.env.CLIENT_URL;
-const jwtSecret = process.env.JWT_SECRET;
 const PORT = process.env.PORT;
 const sessionId = "sessionId";
 const avatarUrl = (gender = "male") => {
@@ -34,7 +33,14 @@ const printAll = () => {
         "dbName": dbName,
         "dbUrl": dbUrl,
         "clientUrl": clientUrl,
-        jwtSecret,
+        jwtSecret: {
+            ACCESS: process.env.JWT_ACCESS_SECRET,
+            REFRESH: process.env.JWT_REFRESH_SECRET
+        },
+        jwtExpiry: {
+            ACCESS: process.env.JWT_ACCESS_EXPIRY,
+            REFRESH: process.env.JWT_REFRESH_EXPIRY
+        },
         PORT,
         sessionId
     })
@@ -45,7 +51,6 @@ export {
     dbName,
     dbUrl,
     clientUrl,
-    jwtSecret,
     PORT,
     sessionId,
     cloudName,

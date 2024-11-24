@@ -3,11 +3,12 @@ import {User} from '../models/user.model.js';
 import {ErrorHandler, sout} from '../utils/utility.js';
 import {compare} from 'bcrypt';
 import {TryCatch} from '../middlewares/error.middleware.js';
-import {cookieOptions, sendToken, uploadFilesToCloudinary} from "../utils/features.js";
-import {avatarUrl, sessionId} from "../utils/constants.js";
+import {uploadFilesToCloudinary} from "../utils/features.js";
+import {avatarUrl} from "../utils/constants.js";
 import {deleteSession, generateAccessToken, generateAuthTokens, getUserSessions, storeSession} from "../utils/jwt.js";
 import {decrypt, encrypt} from "../utils/crypto.js";
 import jwt from "jsonwebtoken";
+import {cookieOptions} from "../helper/helper.js";
 
 const register = TryCatch(async (req, res, next) => {
 	let {firstName, lastName, username, password, email, avatar, gender} = req.body;
@@ -40,8 +41,7 @@ const register = TryCatch(async (req, res, next) => {
 
 	return res
 		.status(200)
-		.cookie("accessToken", accessToken, cookieOptions)
-		.cookie("refreshToken", refreshToken, cookieOptions)
+		.cookie("accessToken", encrypt(accessToken), cookieOptions)
 		.json({
 			success: true,
 			user: encrypt({
@@ -79,8 +79,7 @@ const login = TryCatch(async (req, res, next) => {
 
 	return res
 		.status(200)
-		.cookie("accessToken", accessToken, cookieOptions)
-		.cookie("refreshToken", refreshToken, cookieOptions)
+		.cookie("accessToken", encrypt(accessToken), cookieOptions)
 		.json({
 			success: true,
 			user: encrypt({
@@ -103,7 +102,6 @@ const logout = TryCatch(async (req, res, next) => {
 	return res
 		.status(200)
 		.clearCookie('accessToken')
-		.clearCookie('refreshToken')
 		.json({success: true, message: 'User logged out successfully'});
 });
 
@@ -121,12 +119,17 @@ const getCurrentUser = TryCatch(async (req, res, next) => {
 
 const refreshToken = TryCatch(async (req, res, next) => {
 	let {accessToken} = req?.cookies;
-	if (!refreshToken) return next(new ErrorHandler('Refresh token not provided', 400));
+	if (!accessToken) return next(new ErrorHandler('Unauthorized request', 403));
 
 	// decrypt both tokens
 	accessToken = decrypt(accessToken);
-	const activeSessions = await getUserSessions(req.user.userId);
+	const decodedAccessToken = jwt.decode(accessToken);
+	const activeSessions = await getUserSessions(decodedAccessToken.userId);
+	// console.log("activeSessions", activeSessions)
+	// console.log("decodedAccessToken", decodedAccessToken)
+	// console.log("accessToken", accessToken)
 	const refreshToken = activeSessions.find(session => session.accessToken === accessToken)?.refreshToken;
+	// console.log("Found: ", Object.keys(activeSessions.find(session => session.accessToken === accessToken)))
 	if (!refreshToken) return next(new ErrorHandler('Forbidden Request', 403));
 
 	// check if refresh token is valid
@@ -134,13 +137,18 @@ const refreshToken = TryCatch(async (req, res, next) => {
 	if (!verifiedToken) return next(new ErrorHandler('Forbidden Request', 403));
 
 	// generate new access token
-	const decodedAccessToken = jwt.decode(accessToken);
-	delete decodedAccessToken.iat;
-	delete decodedAccessToken.exp;
-	const newAccessToken = generateAccessToken(decodedAccessToken);
+	const newAccessToken = generateAccessToken({
+		userId: decodedAccessToken.userId,
+		username: decodedAccessToken.username,
+		email: decodedAccessToken.email,
+		role: decodedAccessToken.role,
+	});
+
+	// store new session
+	await storeSession(decodedAccessToken.userId, refreshToken, newAccessToken, activeSessions, true);
 
 	// send new access token in response cookie
-	res.cookie('accessToken', newAccessToken, {httpOnly: true, secure: true, sameSite: 'none'});
+	res.cookie('accessToken', encrypt(newAccessToken), {httpOnly: true, secure: true, sameSite: 'none'});
 
 	return res.status(200).json({success: true});
 });

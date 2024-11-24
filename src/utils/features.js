@@ -1,12 +1,9 @@
 // features.js contains helper functions that are used in multiple places in the application
 import mongoose from "mongoose";
-import jwt from "jsonwebtoken";
-import {jwtSecret, sessionId} from "./constants.js";
 import {sout} from "./utility.js";
 import {v2 as cloudinary} from 'cloudinary';
 import {getBase64} from "../helper/cloudinary.js";
 import {v4 as uuid} from "uuid";
-import {generateAuthTokens} from "./jwt.js";
 import CustomError from "./CustomError.js";
 
 
