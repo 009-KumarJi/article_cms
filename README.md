@@ -66,23 +66,61 @@ The system defines three roles with different permissions:
    npm install
    ```
 
-3. Create a `.env` file in the root directory and add the values for the variables as shown in the `dummy.env` file.
+3. Create a `.env` file in the root directory.
+    - Add the following environment variables:
+    - Replace the values with your own configuration.
+    - The `ENCRYPT_SECRET` is used for encrypting the data sent to the client.
+    - The `CLOUDINARY` variables are used for uploading files to Cloudinary. [you can get these from your Cloudinary account]
+    - The `JWT` variables are used for generating and verifying JWT tokens.
+    - The `REDIS` variables are used for storing refresh tokens. (Can also add a password if required)
+    - The `DB_NAME` and `MONGO_URI` variables are used for connecting to the MongoDB database.
+    - The `CLIENT_URL` variable is used for setting the client URL. (By default, it is set to `http://localhost:5173` if you are using the frontend from this repository)
+    - The `PORT` variable is used for setting the server port.
+    - The `NODE_ENV` variable is used for setting the environment (development, production, etc.).
+   
+   ```dotenv
+    PORT=8080
+    NODE_ENV=production
+    CLIENT_URL=http://localhost:5173
+    
+    DB_NAME=ArticleCMS
+    MONGO_URI=mongodb://localhost:27017/
+    
+    CLOUDINARY_CLOUD_NAME=
+    CLOUDINARY_API_KEY=
+    CLOUDINARY_API_SECRET=
+    
+    JWT_ACCESS_SECRET=
+    JWT_REFRESH_SECRET=
+    JWT_ACCESS_EXPIRY=15m
+    JWT_REFRESH_EXPIRY=12h
+    
+    REDIS_PORT=6379
+    REDIS_HOST=localhost
+    
+    ENCRYPT_SECRET=
+   ```
 
 4. Start the server:
+    - `npm start` - Start the server in production mode.
+    - `npm run dev` - Start the server in development mode.
+   
    ```bash
-   npm start
+    npm start
+    or
+    npm run dev
    ```
 
 ### API Endpoints
 
 #### Authentication:
-- `POST /api/auth/register` - Register a new user.
-- `POST /api/auth/login` - Login a user and return a JWT.
-- `GET /api/auth/logout` - Logout a user and clear the session.
-- `GET /api/auth/me` - Get the current user.
-- `POST /api/auth/refresh-token` - Refresh the access token.
+- `POST /api/auth/register` - Register a new user. (Not authenticated route, anyone can register)
+- `POST /api/auth/login` - Login a user and return a JWT. (Not authenticated route, anyone can login with valid credentials)
+- `GET /api/auth/logout` - Logout a user and clear the session. (Authenticated route)
+- `GET /api/auth/me` - Get the current logged-in user. (Authenticated route)
+- `POST /api/auth/refresh-token` - Refresh the access token. (Authenticated route)
 
-#### Articles:
+#### Articles (Authenticated Route: Only logged-in users):
 - `POST /api/articles` - Create a new article (Admin only).
 - `GET /api/articles` - Get all articles (All roles).
 - `GET /api/articles/:id` - Get a single article by ID (All roles).
